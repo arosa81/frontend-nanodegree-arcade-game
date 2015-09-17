@@ -1,24 +1,24 @@
 //CONSTANTS
-var PLAYER_X_STARTLOCATION = (ctx.canvas.width/2)-50;
-var PLAYER_Y_STARTLOCATION = 400;
+var PLAYER_X_STARTLOC = (ctx.canvas.width/2)-50;
+var PLAYER_Y_STARTLOC = 400;
 var PLAYER_X_MOVEMENT = 100;
 var PLAYER_Y_MOVEMENT = 85;
 var BUG1_X_STARTLOC = 0;
 var BUG1_Y_STARTLOC = 63;
 var BUG2_X_STARTLOC = 300;
 var BUG2_Y_STARTLOC = 145;
-var BUG3_X_STARTLOC = 75;
+var BUG3_X_STARTLOC = 45;
 var BUG3_Y_STARTLOC = 145;
 var BUG4_X_STARTLOC = 130;
 var BUG4_Y_STARTLOC = 230;
+var WATER_LOC = 16;
 
 // Enemies our player must avoid
-var Enemy = function(x, y, speed) {
+var Enemy = function(x, y) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
     this.x = x;
     this.y = y;
-    this.speed = speed;
     this.width = 50;
     this.height = 50;
     // The image/sprite for our enemies, this uses
@@ -30,18 +30,22 @@ var Enemy = function(x, y, speed) {
 // Parameter: dt, a time delta between ticks
 // Multiply any movement by the dt parameter
 Enemy.prototype.update = function(dt) {
+    // send the bug back to the starting point of the canvas
+    var speed = getRandomIntInclusive(100, 400);
     if (this.x > ctx.canvas.width) {
       this.x = -90;
     }
     this.render();
-    this.x += dt * this.speed;
-    console.log("BUG x, y: " + this.x + ", " + this.y);
-    console.log(isCollision(this.x, this.y, this.width, this.height));
-    if (isCollision(this.x, this.y, this.width, this.height)) {
-      player.x = PLAYER_X_STARTLOCATION;
-      player.y = PLAYER_Y_STARTLOCATION;
+    if (this.x < 0) {
+      speed += getRandomIntInclusive(300, 700)*dt;
     }
-    // return this.x;
+
+    this.x += dt * speed;
+    // Check for collision with player and send him back home
+    if (isCollision(this.x, this.y, this.width, this.height)) {
+      player.x = PLAYER_X_STARTLOC;
+      player.y = PLAYER_Y_STARTLOC;
+    }
 };
 
 // checks to see if any collision occurs b/n bugs and player objects
@@ -63,8 +67,6 @@ function isCollision(bugXCoord, bugYCoord, bugWidth, bugHeight) {
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    ctx.fillStyle = "red";//rgba(255, 255, 255, 0)";
-    ctx.fillRect(this.x+15, this.y+(171/2), this.width, this.height);
 };
 
 // Now write your own player class
@@ -78,25 +80,21 @@ var Player = function(x, y) {
   this.height = 60;
 };
 
+// Setter to update Player's x value
 Player.prototype.setX = function(x) {
   this.x = x;
 };
 
+// Setter to update Player's y value
 Player.prototype.setY = function(y) {
-  this.x = y;
+  this.y = y;
 };
 
 Player.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-
-    if (this.y < 16) {
-      this.x = PLAYER_X_STARTLOCATION;
-      this.y = PLAYER_Y_STARTLOCATION;
-    }
     checkBoundary(this.x, this.y);
-    console.log("PLAYER x, y: " + this.x + ", " + this.y);
     return this.y * dt;
 };
 
@@ -104,6 +102,16 @@ function checkBoundary(x, y) {
   // Check left canvas boundary
   if (x <= 0) {
     player.setX(0);
+  }
+  else if (x >= ctx.canvas.width-20) {
+    player.setX((ctx.canvas.width-40)-player.width);
+  }
+  else if (y > PLAYER_Y_STARTLOC) {
+    player.setY(PLAYER_Y_STARTLOC);
+  }
+  else if (y < WATER_LOC) {
+    player.setX(PLAYER_X_STARTLOC);
+    player.setY(PLAYER_Y_STARTLOC);
   }
 }
 
@@ -132,19 +140,17 @@ Player.prototype.handleInput = function(direction){
 
 Player.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-  ctx.fillStyle = "blue";//rgba(255, 255, 255, 0)";
-  ctx.fillRect(this.x+20, this.y+70, this.width, this.height);
 };
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var bug1 = new Enemy(BUG1_X_STARTLOC, BUG1_Y_STARTLOC, 50);
-var bug2 = new Enemy(BUG2_X_STARTLOC, BUG2_Y_STARTLOC, 80);
-var bug3 = new Enemy(BUG3_X_STARTLOC, BUG3_Y_STARTLOC, 60);
-var bug4 = new Enemy(BUG4_X_STARTLOC, BUG4_Y_STARTLOC, 40);
+var bug1 = new Enemy(BUG1_X_STARTLOC, BUG1_Y_STARTLOC);
+var bug2 = new Enemy(BUG2_X_STARTLOC, BUG2_Y_STARTLOC);
+var bug3 = new Enemy(BUG3_X_STARTLOC, BUG3_Y_STARTLOC);
+var bug4 = new Enemy(BUG4_X_STARTLOC, BUG4_Y_STARTLOC);
 var allEnemies = [bug1, bug2, bug3, bug4];
-var player = new Player(PLAYER_X_STARTLOCATION, PLAYER_Y_STARTLOCATION);
+var player = new Player(PLAYER_X_STARTLOC, PLAYER_Y_STARTLOC);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -158,3 +164,8 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+// Utility function to randomize stuff
+function getRandomIntInclusive(min, max) {
+  return Math.floor(Math.random() * (max - min + 100)) + min;
+}
