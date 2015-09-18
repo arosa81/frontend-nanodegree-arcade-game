@@ -5,12 +5,22 @@ var PLAYER_X_MOVEMENT = 100;
 var PLAYER_Y_MOVEMENT = 85;
 var BUG1_X_STARTLOC = 0;
 var BUG1_Y_STARTLOC = 63;
-var BUG2_X_STARTLOC = 300;
+var BUG2_X_STARTLOC = 0;
 var BUG2_Y_STARTLOC = 145;
-var BUG3_X_STARTLOC = 45;
+var BUG3_X_STARTLOC = 0;
 var BUG3_Y_STARTLOC = 145;
-var BUG4_X_STARTLOC = 130;
+var BUG4_X_STARTLOC = 0;
 var BUG4_Y_STARTLOC = 230;
+var pointTotal = 0;
+
+// var BUG1_X_STARTLOC = 0;
+// var BUG1_Y_STARTLOC = 63;
+// var BUG2_X_STARTLOC = 300;
+// var BUG2_Y_STARTLOC = 145;
+// var BUG3_X_STARTLOC = 45;
+// var BUG3_Y_STARTLOC = 145;
+// var BUG4_X_STARTLOC = 130;
+// var BUG4_Y_STARTLOC = 230;
 var WATER_LOC = 16;
 
 // Enemies our player must avoid
@@ -45,7 +55,14 @@ Enemy.prototype.update = function(dt) {
     if (isCollision(this.x, this.y, this.width, this.height)) {
       player.x = PLAYER_X_STARTLOC;
       player.y = PLAYER_Y_STARTLOC;
+      pointTotal -= 10;
     }
+    console.log("POINTS: " + pointTotal);
+};
+
+// Draw the enemy on the screen, required method for game
+Enemy.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
 // checks to see if any collision occurs b/n bugs and player objects
@@ -63,11 +80,6 @@ function isCollision(bugXCoord, bugYCoord, bugWidth, bugHeight) {
 	else
 		return false;
 }
-
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -94,26 +106,34 @@ Player.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-    checkBoundary(this.x, this.y);
+    checkXBoundary(this.x, this.y);
+    checkYBoundary(this.x, this.y);
+    console.log("Player X, Y: " + this.x + ", " + this.y);
     return this.y * dt;
 };
 
-function checkBoundary(x, y) {
-  // Check left canvas boundary
+// Checking left/right canvas boundaries and keeping player inside of them
+function checkXBoundary(x, y) {
   if (x <= 0) {
     player.setX(0);
   }
   else if (x >= ctx.canvas.width-20) {
     player.setX((ctx.canvas.width-40)-player.width);
   }
-  else if (y > PLAYER_Y_STARTLOC) {
+}
+
+// Checking top/bottom canvas boundaries and keeping player inside of them
+function checkYBoundary(x, y) {
+  if (y > PLAYER_Y_STARTLOC) {
     player.setY(PLAYER_Y_STARTLOC);
   }
-  else if (y < WATER_LOC) {
+  else if (y <= WATER_LOC) {
     player.setX(PLAYER_X_STARTLOC);
     player.setY(PLAYER_Y_STARTLOC);
+    pointTotal += 10;
   }
 }
+
 
 Player.prototype.handleInput = function(direction){
   switch (direction) {
@@ -142,6 +162,14 @@ Player.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+function pointCheck() {
+  if (isCollision === true) {
+    pointTotal -= 10;
+  }
+  console.log("POINT TOTAL: " + pointTotal);
+  return pointTotal;
+}
+
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
@@ -164,8 +192,3 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
-
-// Utility function to randomize stuff
-function getRandomIntInclusive(min, max) {
-  return Math.floor(Math.random() * (max - min + 100)) + min;
-}
