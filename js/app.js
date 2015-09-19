@@ -1,95 +1,91 @@
-//CONSTANTS
+// CONSTANTS
 var PLAYER_X_STARTLOC = (ctx.canvas.width/2)-50;
 var PLAYER_Y_STARTLOC = 400;
 var PLAYER_X_MOVEMENT = 100;
 var PLAYER_Y_MOVEMENT = 85;
-var BUG1_X_STARTLOC = 0;
+var BUG1_X_STARTLOC = getRandomIntInclusive(2, 600);
 var BUG1_Y_STARTLOC = 63;
-var BUG2_X_STARTLOC = 0;
+var BUG2_X_STARTLOC = getRandomIntInclusive(2, 600);
 var BUG2_Y_STARTLOC = 145;
-var BUG3_X_STARTLOC = 0;
+var BUG3_X_STARTLOC = getRandomIntInclusive(2, 600);
 var BUG3_Y_STARTLOC = 145;
-var BUG4_X_STARTLOC = 0;
+var BUG4_X_STARTLOC = getRandomIntInclusive(15, 20);
 var BUG4_Y_STARTLOC = 230;
+var GEM1_Y_STARTLOC = 63;
+var GEM2_Y_STARTLOC = 145;
+var GEM3_Y_STARTLOC = 230;
+var WATER_Y_STARTLOC = 16;
+
+// Global variables
 var pointTotal = 0;
 
-// var BUG1_X_STARTLOC = 0;
-// var BUG1_Y_STARTLOC = 63;
-// var BUG2_X_STARTLOC = 300;
-// var BUG2_Y_STARTLOC = 145;
-// var BUG3_X_STARTLOC = 45;
-// var BUG3_Y_STARTLOC = 145;
-// var BUG4_X_STARTLOC = 130;
-// var BUG4_Y_STARTLOC = 230;
-var WATER_LOC = 16;
-
-// Enemies our player must avoid
+/**
+* @name Enemy
+* @description Represents an enemy
+* @constructor
+* @param {string} sprite - The bug image asset
+* @param {integer} x - The x coordinate of an enemy
+* @param {integer} y - The y coordinate of an enemy
+* @param {integer} width - The width of an enemy
+* @param {integer} height - The height of an enemy
+*/
 var Enemy = function(x, y) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
     this.x = x;
     this.y = y;
     this.width = 50;
     this.height = 50;
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
 };
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
-// Multiply any movement by the dt parameter
+// Updates the enemy's position,
+// checks for collision with the player and removes points from
+// the game score
 Enemy.prototype.update = function(dt) {
     // send the bug back to the starting point of the canvas
-    var speed = getRandomIntInclusive(100, 400);
+    var speed = getRandomIntInclusive(1, 10);
     if (this.x > ctx.canvas.width) {
       this.x = -90;
     }
-    this.render();
-    if (this.x < 0) {
-      speed += getRandomIntInclusive(300, 700)*dt;
+    // randomize speed again to get bugs moving differently
+    if (this.x === -90) {
+      speed = getRandomIntInclusive(0, 5);
     }
-
-    this.x += dt * speed;
-    // Check for collision with player and send him back home
-    if (isCollision(this.x, this.y, this.width, this.height)) {
+    // Check for collision with player and sends him back home
+    if (isBugCollision(this.x, this.y, this.width, this.height)) {
       player.x = PLAYER_X_STARTLOC;
       player.y = PLAYER_Y_STARTLOC;
       pointTotal -= 10;
+      scorePoint.countPoint(pointTotal);
     }
-    console.log("POINTS: " + pointTotal);
+    return this.x += speed + dt;
 };
 
-// Draw the enemy on the screen, required method for game
+/**
+* @name Enemy.prototype.render
+* @description Draw the enemy on the screen, required method for game
+* @function
+*/
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-// checks to see if any collision occurs b/n bugs and player objects
-function isCollision(bugXCoord, bugYCoord, bugWidth, bugHeight) {
-  var bugXHitCoord = bugXCoord+15;
-  var bugYHitCoord = bugYCoord+(171/2);
-  var playerXHitCoord = player.x+20;
-  var playerYHitCoord = player.y+70;
-  // referencing algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
-  if (bugXHitCoord < playerXHitCoord + player.width &&
-   bugXHitCoord + bugWidth > playerXHitCoord &&
-   bugYHitCoord < playerYHitCoord + player.height &&
-   bugHeight + bugYHitCoord > playerYHitCoord)
-	  return true;
-	else
-		return false;
-}
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+/**
+* @name Player
+* @description Represents the player
+* @constructor
+* @param {string} sprite - The player image asset
+* @param {integer} x - The x coordinate of a player
+* @param {integer} y - The y coordinate of a player
+* @param {integer} width - The width of a player
+* @param {integer} height - The height of a player
+*/
 var Player = function(x, y) {
-  this.sprite = "images/char-boy.png";
   this.x = x;
   this.y = y;
   this.width = 61;
   this.height = 60;
+  this.sprite = "images/char-boy.png";
 };
 
 // Setter to update Player's x value
@@ -102,55 +98,28 @@ Player.prototype.setY = function(y) {
   this.y = y;
 };
 
+// Checks to see if player is hitting boundaries of the game screen
+// and keeps him within boundaries.
+// Updates the players movements.
 Player.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
     checkXBoundary(this.x, this.y);
     checkYBoundary(this.x, this.y);
-    console.log("Player X, Y: " + this.x + ", " + this.y);
     return this.y * dt;
 };
 
-// Checking left/right canvas boundaries and keeping player inside of them
-function checkXBoundary(x, y) {
-  if (x <= 0) {
-    player.setX(0);
-  }
-  else if (x >= ctx.canvas.width-20) {
-    player.setX((ctx.canvas.width-40)-player.width);
-  }
-}
-
-// Checking top/bottom canvas boundaries and keeping player inside of them
-function checkYBoundary(x, y) {
-  if (y > PLAYER_Y_STARTLOC) {
-    player.setY(PLAYER_Y_STARTLOC);
-  }
-  else if (y <= WATER_LOC) {
-    player.setX(PLAYER_X_STARTLOC);
-    player.setY(PLAYER_Y_STARTLOC);
-    pointTotal += 10;
-  }
-}
-
-
+// Handles key input to move the player in any x, y direction
 Player.prototype.handleInput = function(direction){
   switch (direction) {
     case "left":
-      //TO DO: move left
       this.x -= PLAYER_X_MOVEMENT;
       break;
     case "right":
-      //TO DO: move left
       this.x += PLAYER_X_MOVEMENT;
       break;
     case "up":
-      //TO DO: move left
       this.y -= PLAYER_Y_MOVEMENT;
       break;
     case "down":
-      //TO DO: move left
       this.y += PLAYER_Y_MOVEMENT;
       break;
     default:
@@ -158,27 +127,119 @@ Player.prototype.handleInput = function(direction){
   }
 };
 
+/**
+* @name Player.prototype.render
+* @description Draw the player on the screen
+* @function
+*/
 Player.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
-function pointCheck() {
-  if (isCollision === true) {
-    pointTotal -= 10;
+/**
+* @name Gem
+* @description Represents a gem
+* @constructor
+* @param {string} sprite - The gem image asset
+* @param {integer} x - The x coordinate of a gem
+* @param {integer} y - The y coordinate of a gem
+* @param {integer} width - The width of a gem
+* @param {integer} height - The height of a gem
+* @param {string} colour - The colour of a gem
+*/
+var Gem = function(x, y, colour) {
+    this.x = x;
+    this.y = y;
+    this.width = 70;
+    this.height = 50;
+    this.colour = colour;
+    this.sprite = 'images/Gem ' + this.colour + '.png';
+};
+
+/**
+* @name Gem.prototype.setX
+* @description Setter to update Gem's x parameter
+* @function
+* @param {integer} x - update Gem's x parameter
+*/
+Gem.prototype.setX = function(x) {
+  this.x = x;
+};
+
+/**
+* @name Gem.prototype.update
+* @description updates the Gems coordinates when collision occurs and gives player game points
+* @function
+* @param {integer} score - The game score total
+*/
+Gem.prototype.update = function(dt) {
+  // Check for collision with player and send him back home
+  if (isGemCollision(this.x, this.y, this.width, this.height)) {
+    this.x = -100;
+    pointTotal += 5;
+    scorePoint.countPoint(pointTotal);
   }
-  console.log("POINT TOTAL: " + pointTotal);
-  return pointTotal;
-}
+  if ((allGems[0].x === -100) && (allGems[1].x === -100) && (allGems[1].x === -100)) {
+    allGems.forEach(function(gem) {
+      gem.setX(getRandomIntInclusive(2, 450));
+    });
+  }
+};
+
+/**
+* @name Gem.prototype.render
+* @description Draw the gem on the screen
+* @function
+*/
+Gem.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+/**
+* @name Score
+* @description Represents the games score
+* @constructor
+* @param {integer} score - The game score total
+*/
+var Score = function(score) {
+  this.score = score;
+};
+
+/**
+* @name Score.prototype.countPoint
+* @description Setter to add or subtract points to the game score
+* @function
+* @param {integer} pointTotal - sets game score parameter whenever points are counted
+*/
+Score.prototype.countPoint = function(pointTotal) {
+  this.score = pointTotal;
+};
+
+/**
+* @name Score.prototype.render
+* @description Draw the total game score on the screen
+* @function
+*/
+Score.prototype.render = function() {
+  ctx.font = "20px serif";
+  var displayText = "Score: " + this.score;
+  ctx.fillText(displayText,ctx.canvas.width-95,80);
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 var bug1 = new Enemy(BUG1_X_STARTLOC, BUG1_Y_STARTLOC);
 var bug2 = new Enemy(BUG2_X_STARTLOC, BUG2_Y_STARTLOC);
-var bug3 = new Enemy(BUG3_X_STARTLOC, BUG3_Y_STARTLOC);
-var bug4 = new Enemy(BUG4_X_STARTLOC, BUG4_Y_STARTLOC);
+var bug3 = new Enemy(BUG4_X_STARTLOC, BUG3_Y_STARTLOC);
+var bug4 = new Enemy(BUG3_X_STARTLOC, BUG4_Y_STARTLOC);
 var allEnemies = [bug1, bug2, bug3, bug4];
 var player = new Player(PLAYER_X_STARTLOC, PLAYER_Y_STARTLOC);
+var scorePoint = new Score(pointTotal);
+var gem1 = new Gem(getRandomIntInclusive(2, 450), GEM1_Y_STARTLOC, "Blue");
+var gem2 = new Gem(getRandomIntInclusive(2, 450), GEM2_Y_STARTLOC, "Green");
+var gem3 = new Gem(getRandomIntInclusive(2, 450), GEM3_Y_STARTLOC, "Orange");
+var allGems = [gem1,gem2,gem3];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
