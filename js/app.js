@@ -37,9 +37,12 @@ var Enemy = function(x, y) {
     this.sprite = 'images/enemy-bug.png';
 };
 
-// Updates the enemy's position,
-// checks for collision with the player and removes points from
-// the game score
+/**
+* @name Enemy.prototype.update
+* @description Updates enemy coordinates. Checks for collision with player and takes away game points
+* @function
+* @param {double} dt - time delta for smooth animation
+*/
 Enemy.prototype.update = function(dt) {
     // send the bug back to the starting point of the canvas
     var speed = getRandomIntInclusive(1, 10);
@@ -88,26 +91,44 @@ var Player = function(x, y) {
   this.sprite = "images/char-boy.png";
 };
 
-// Setter to update Player's x value
+/**
+* @name Player.prototype.setX
+* @description Setter to update Player's x parameter
+* @function
+* @param {integer} x - update Player's x parameter
+*/
 Player.prototype.setX = function(x) {
   this.x = x;
 };
 
-// Setter to update Player's y value
+/**
+* @name Player.prototype.setY
+* @description Setter to update Player's y parameter
+* @function
+* @param {integer} y - update Player's y parameter
+*/
 Player.prototype.setY = function(y) {
   this.y = y;
 };
 
-// Checks to see if player is hitting boundaries of the game screen
-// and keeps him within boundaries.
-// Updates the players movements.
+/**
+* @name Player.prototype.update
+* @description Updates player on screen. Check if player is hitting boundaries of the game screen and keeps him in.
+* @function
+* @param {double} dt - time delta for smooth animation
+*/
 Player.prototype.update = function(dt) {
     checkXBoundary(this.x, this.y);
     checkYBoundary(this.x, this.y);
     return this.y * dt;
 };
 
-// Handles key input to move the player in any x, y direction
+/**
+* @name Player.prototype.handleInput
+* @description Handles key input to move the player in any x, y direction
+* @function
+* @param {string} direction - the direction the player moves
+*/
 Player.prototype.handleInput = function(direction){
   switch (direction) {
     case "left":
@@ -170,7 +191,7 @@ Gem.prototype.setX = function(x) {
 * @name Gem.prototype.update
 * @description updates the Gems coordinates when collision occurs and gives player game points
 * @function
-* @param {integer} score - The game score total
+* @param {double} dt - time delta for smooth animation
 */
 Gem.prototype.update = function(dt) {
   // Check for collision with player and send him back home
