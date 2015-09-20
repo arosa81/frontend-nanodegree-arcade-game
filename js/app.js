@@ -18,6 +18,8 @@ var WATER_Y_STARTLOC = 16;
 
 // Global variables
 var pointTotal = 0;
+var numBugs = 4;
+var numGems = 3;
 
 /**
 * @name Enemy
@@ -71,7 +73,6 @@ Enemy.prototype.update = function(dt) {
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
-
 
 /**
 * @name Player
@@ -250,17 +251,28 @@ Score.prototype.render = function() {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var bug1 = new Enemy(BUG1_X_STARTLOC, BUG1_Y_STARTLOC);
-var bug2 = new Enemy(BUG2_X_STARTLOC, BUG2_Y_STARTLOC);
-var bug3 = new Enemy(BUG4_X_STARTLOC, BUG3_Y_STARTLOC);
-var bug4 = new Enemy(BUG3_X_STARTLOC, BUG4_Y_STARTLOC);
-var allEnemies = [bug1, bug2, bug3, bug4];
+
+// Instantiating enemy objects
+var allEnemies = [];
+var allEnemiesX = [BUG1_X_STARTLOC, BUG2_X_STARTLOC, BUG3_X_STARTLOC, BUG4_X_STARTLOC];
+var allEnemiesY = [BUG1_Y_STARTLOC, BUG2_Y_STARTLOC, BUG3_Y_STARTLOC, BUG4_Y_STARTLOC];
+for (var i = 0; i < numBugs; i++) {
+  allEnemies[i] = new Enemy(allEnemiesX[i], allEnemiesY[i]);
+}
+
+// Instantiating gem objects
+var allGems = [];
+var allGemsY = [GEM1_Y_STARTLOC, GEM2_Y_STARTLOC, GEM3_Y_STARTLOC];
+var allGemsColour = ["Blue", "Green", "Orange"];
+for (var i = 0; i < numGems; i++) {
+  allGems[i] = new Gem(getRandomIntInclusive(2, 450), allGemsY[i], allGemsColour[i]);
+}
+
+// Instantiating player object
 var player = new Player(PLAYER_X_STARTLOC, PLAYER_Y_STARTLOC);
+
+// Instantiating game score object
 var scorePoint = new Score(pointTotal);
-var gem1 = new Gem(getRandomIntInclusive(2, 450), GEM1_Y_STARTLOC, "Blue");
-var gem2 = new Gem(getRandomIntInclusive(2, 450), GEM2_Y_STARTLOC, "Green");
-var gem3 = new Gem(getRandomIntInclusive(2, 450), GEM3_Y_STARTLOC, "Orange");
-var allGems = [gem1,gem2,gem3];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
