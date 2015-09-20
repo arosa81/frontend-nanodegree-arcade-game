@@ -57,13 +57,37 @@ Enemy.prototype.update = function(dt) {
       speed = getRandomIntInclusive(0, 5);
     }
     // Check for collision with player and sends him back home
-    if (isBugCollision(this.x, this.y, this.width, this.height)) {
+    if (this.isBugCollision(this.x, this.y, this.width, this.height)) {
       player.x = PLAYER_X_STARTLOC;
       player.y = PLAYER_Y_STARTLOC;
       pointTotal -= 10;
       scorePoint.countPoint(pointTotal);
     }
     return this.x += speed + dt;
+};
+
+/**
+* @name Enemy.prototype.isBugCollision
+* @description checks to see if any collision occurs b/n bugs and player objects
+* @function
+* @param {integer} bugXCoord - x coordinate of bug on canvas
+* @param {integer} bugYCoord - y coordinate of bug on canvas
+* @param {integer} bugWidth - width value of a bug
+* @param {integer} bugHeight - height value of a bug
+*/
+Enemy.prototype.isBugCollision = function(bugXCoord, bugYCoord, bugWidth, bugHeight) {
+  var bugXHitCoord = bugXCoord+15;
+  var bugYHitCoord = bugYCoord+(171/2);
+  var playerXHitCoord = player.x+20;
+  var playerYHitCoord = player.y+70;
+  // referencing algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+  if (bugXHitCoord < playerXHitCoord + player.width &&
+   bugXHitCoord + bugWidth > playerXHitCoord &&
+   bugYHitCoord < playerYHitCoord + player.height &&
+   bugHeight + bugYHitCoord > playerYHitCoord)
+	  return true;
+	else
+		return false;
 };
 
 /**
@@ -120,9 +144,44 @@ Player.prototype.setY = function(y) {
 * @param {double} dt - time delta for smooth animation
 */
 Player.prototype.update = function(dt) {
-    checkXBoundary(this.x, this.y);
-    checkYBoundary(this.x, this.y);
+    this.checkXBoundary(this.x, this.y);
+    this.checkYBoundary(this.x, this.y);
     return this.y * dt;
+};
+
+/**
+* @name Player.prototype.checkXBoundary
+* @description Checking left/right canvas boundaries and keeping player inside of them
+* @function
+* @param {integer} x - x coordinate on canvas
+* @param {integer} y - y coordinate on canvas
+*/
+Player.prototype.checkXBoundary = function(x, y) {
+  if (x <= 0) {
+    player.setX(0);
+  }
+  else if (x >= ctx.canvas.width-20) {
+    player.setX((ctx.canvas.width-40)-player.width);
+  }
+};
+
+/**
+* @name Player.prototype.checkYBoundary
+* @description Checking top/bottom canvas boundaries and keeping player inside of them. Sending player to start location when he touches the water and giving game points.
+* @function
+* @param {integer} x - x coordinate on canvas
+* @param {integer} y - y coordinate on canvas
+*/
+Player.prototype.checkYBoundary = function(x, y) {
+  if (y > PLAYER_Y_STARTLOC) {
+    player.setY(PLAYER_Y_STARTLOC);
+  }
+  else if (y <= WATER_Y_STARTLOC) {
+    player.setX(PLAYER_X_STARTLOC);
+    player.setY(PLAYER_Y_STARTLOC);
+    pointTotal += 10;
+    scorePoint.countPoint(pointTotal);
+  }
 };
 
 /**
@@ -197,7 +256,7 @@ Gem.prototype.setX = function(x) {
 */
 Gem.prototype.update = function(dt) {
   // Check for collision with player and send him back home
-  if (isGemCollision(this.x, this.y, this.width, this.height)) {
+  if (this.isGemCollision(this.x, this.y, this.width, this.height)) {
     this.x = OFF_CANVAS_COORD;
     pointTotal += 5;
     scorePoint.countPoint(pointTotal);
@@ -208,6 +267,30 @@ Gem.prototype.update = function(dt) {
     });
   }
 };
+
+/**
+* @name Gem.prototype.isGemCollision
+* @description checks to see if any collision occurs b/n gem and player objects
+* @function
+* @param {integer} gemXCoord - x coordinate of bug on canvas
+* @param {integer} gemYCoord - y coordinate of bug on canvas
+* @param {integer} gemWidth - width value of a bug
+* @param {integer} gemHeight - height value of a bug
+*/
+Gem.prototype.isGemCollision = function(gemXCoord, gemYCoord, gemWidth, gemHeight) {
+  var gemXHitCoord = gemXCoord+15;
+  var gemYHitCoord = gemYCoord+(171/2);
+  var playerXHitCoord = player.x+20;
+  var playerYHitCoord = player.y+70;
+  // referencing algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+  if (gemXHitCoord < playerXHitCoord + player.width &&
+   gemXHitCoord + gemWidth > playerXHitCoord &&
+   gemYHitCoord < playerYHitCoord + player.height &&
+   gemHeight + gemYHitCoord > playerYHitCoord)
+	  return true;
+	else
+		return false;
+}
 
 /**
 * @name Gem.prototype.render
