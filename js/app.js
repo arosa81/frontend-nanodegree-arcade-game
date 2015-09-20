@@ -15,6 +15,7 @@ var GEM1_Y_STARTLOC = 63;
 var GEM2_Y_STARTLOC = 145;
 var GEM3_Y_STARTLOC = 230;
 var WATER_Y_STARTLOC = 16;
+var OFF_CANVAS_COORD = -100;
 
 // Global variables
 var pointTotal = 0;
@@ -49,10 +50,10 @@ Enemy.prototype.update = function(dt) {
     // send the bug back to the starting point of the canvas
     var speed = getRandomIntInclusive(1, 10);
     if (this.x > ctx.canvas.width) {
-      this.x = -90;
+      this.x = OFF_CANVAS_COORD;
     }
     // randomize speed again to get bugs moving differently
-    if (this.x === -90) {
+    if (this.x === OFF_CANVAS_COORD) {
       speed = getRandomIntInclusive(0, 5);
     }
     // Check for collision with player and sends him back home
@@ -197,11 +198,11 @@ Gem.prototype.setX = function(x) {
 Gem.prototype.update = function(dt) {
   // Check for collision with player and send him back home
   if (isGemCollision(this.x, this.y, this.width, this.height)) {
-    this.x = -100;
+    this.x = OFF_CANVAS_COORD;
     pointTotal += 5;
     scorePoint.countPoint(pointTotal);
   }
-  if ((allGems[0].x === -100) && (allGems[1].x === -100) && (allGems[1].x === -100)) {
+  if ((allGems[0].x === OFF_CANVAS_COORD) && (allGems[1].x === OFF_CANVAS_COORD) && (allGems[1].x === OFF_CANVAS_COORD)) {
     allGems.forEach(function(gem) {
       gem.setX(getRandomIntInclusive(2, 450));
     });
