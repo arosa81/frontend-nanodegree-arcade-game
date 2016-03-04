@@ -11,6 +11,9 @@ This is a clone of a frogger-type game. The game engine and art assets were prov
 
 The objective of the game is to reach the water without getting hit by bugs and get as many points as possible.
 
+A [live demo of the game can be found here](http://arosa81.github.io/froggerarcadegame/).
+
+
 How to Start a Game
 ===============================
 
